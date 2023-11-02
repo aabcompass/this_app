@@ -8,7 +8,7 @@
 % this('.',2);
 % this('.',3);
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/lftp/Lvozero-1st/1','6','4');
-this('/mnt/md0/Aurora/tmp/','6',4);
+this('/mnt/md0/Aurora/l20231015h1/','6',125);
 
 stop
 

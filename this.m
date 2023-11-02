@@ -463,9 +463,15 @@ function exit_code = this(path, level, Ts)
    disp 'Generating light curve with lower resolution'
    if(level==4 || level==6)
        period_us_decim = 20000; 
-       decim_factor = period_us_decim / period_us; 
-       lightcurvesum_global_decim = decimate(lightcurvesum_global, decim_factor);
-       unixtime_dbl_global_decim = unixtime_dbl_global(1:decim_factor:end);
+       if(period_us_decim < period_us) 
+            period_us_decim = period_us;
+            lightcurvesum_global_decim = lightcurvesum_global;
+            unixtime_dbl_global_decim = unixtime_dbl_global;
+       else    
+            decim_factor = period_us_decim / period_us; 
+            lightcurvesum_global_decim = decimate(lightcurvesum_global, decim_factor);
+            unixtime_dbl_global_decim = unixtime_dbl_global(1:decim_factor:end);
+       end
    end    
        
    disp 'Saving martixes to .mat file'
