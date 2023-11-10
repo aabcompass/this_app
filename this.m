@@ -10,6 +10,7 @@
 function exit_code = this(path, level, Ts)
 
     level = str2num(level);
+    Ts = str2num(Ts);
     
     display('JEM-EUSO .dat to .mat preprocessor'); 
 
