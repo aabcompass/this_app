@@ -425,11 +425,17 @@ function exit_code = this(path, level, Ts)
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
                 k=k+1;            
             elseif(level == 6) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*Ts*400)*(2.5e-6)-5;
-                k=k+1;
+                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*Ts*400)*(2.5e-6) - 5;
+                %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
+                k=k+1; 
             end
         end
     end
+    
+    
+    
+    
+    
     
     if(level <= 3)
         
@@ -460,25 +466,26 @@ function exit_code = this(path, level, Ts)
         end
     end
     
-   disp 'Generating light curve with lower resolution'
-   if(level==4 || level==6)
-       period_us_decim = 20000; 
-       if(period_us_decim < period_us) 
-            period_us_decim = period_us;
-            lightcurvesum_global_decim = lightcurvesum_global;
-            unixtime_dbl_global_decim = unixtime_dbl_global;
-       else    
-            decim_factor = period_us_decim / period_us; 
-            lightcurvesum_global_decim = decimate(lightcurvesum_global, decim_factor);
-            unixtime_dbl_global_decim = unixtime_dbl_global(1:decim_factor:end);
-       end
-   end    
+%    disp 'Generating light curve with lower resolution'
+%    if(level==4 || level==6)
+%        period_us_decim = 20000; 
+%        if(period_us_decim < period_us) 
+%             period_us_decim = period_us;
+%             lightcurvesum_global_decim = lightcurvesum_global;
+%             unixtime_dbl_global_decim = unixtime_dbl_global;
+%        else    
+%             decim_factor = int32(period_us_decim / period_us); 
+%             lightcurvesum_global_decim = decimate(lightcurvesum_global, decim_factor);
+%             unixtime_dbl_global_decim = unixtime_dbl_global(1:decim_factor:end);
+%        end
+%    end   
+   unixtime_dbl_global_decim = 0;
        
    disp 'Saving martixes to .mat file'
 
    if(level==6)
         save([path '/lovozero.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global', 'pdm_2d_sp_global' ,'period_us', '-v7.3');
-        save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
+        %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
    elseif(level==5)
         unixtime_dbl_sp_global = unixtime_dbl_global;
         sp_letter = ["A","I","B","J","C","K","D","L","E","M","F","N","G","Q","H","P"];
