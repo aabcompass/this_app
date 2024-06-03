@@ -215,10 +215,10 @@ function exit_code = this(path, level, Ts)
             if(filesize ~= 3840064)
                 continue;
             end
-        elseif(level==6)
-            if(filesize ~= 3840064)
-                continue;
-            end
+        %elseif(level==6)
+        %    if(filesize ~= 3840064)
+        %        continue;
+        %    end
         elseif(level==7)
             if(filesize ~= 3687040)
                 continue;
@@ -456,18 +456,20 @@ function exit_code = this(path, level, Ts)
     
     disp 'Generate double unix time'
     
-    dngtu=diff(double(ngtu_global));
-    ngtu_u64_global = uint64(zeros(1, numel(ngtu_global)));
-    ovflw_cnt = 0;
-    ngtu_u64_global(1) = double(ngtu_global(1));
-    ngtu_u64_global(2) = double(ngtu_global(2));
-    for i=1:numel(ngtu_global)-2
-        if(dngtu(i+1) - dngtu(i) < -1e9) 
-            ovflw_cnt = ovflw_cnt + 1;
+    if(filename_cntr > 1)
+        dngtu=diff(double(ngtu_global));
+        ngtu_u64_global = uint64(zeros(1, numel(ngtu_global)));
+        ovflw_cnt = 0;
+        ngtu_u64_global(1) = double(ngtu_global(1));
+        ngtu_u64_global(2) = double(ngtu_global(2));
+        for i=1:numel(ngtu_global)-2
+            if(dngtu(i+1) - dngtu(i) < -1e9) 
+                ovflw_cnt = ovflw_cnt + 1;
+            end
+            ngtu_u64_global(i+2) = uint64(ngtu_global(i+2)) + ovflw_cnt*2^32;
         end
-        ngtu_u64_global(i+2) = uint64(ngtu_global(i+2)) + ovflw_cnt*2^32;
     end
-       
+
     k=0;
     for i=1:numel(ngtu_global)
         for j=1:num_of_frames
@@ -491,7 +493,8 @@ function exit_code = this(path, level, Ts)
                 k=k+1; 
             end
         end
-    end
+    end        
+    
     
     
     

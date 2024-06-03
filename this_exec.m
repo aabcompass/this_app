@@ -12,7 +12,9 @@
 %this('/home/alx/tmp/lovozero_pixelmaps/pixels','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/PMTs','6',4.2);
 %this('.','6',4.2);
-this('.','7',2.5);
+%this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/lftp','6',4.2);
+this('/home/alx/Downloads/102','6',4.2);
+
 
 
 stop
