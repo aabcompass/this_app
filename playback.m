@@ -1,18 +1,44 @@
+integration = 5000;
+date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
+
+plot(date,lightcurvesum_global/integration,'-k')
+stop
+%%
 plot(reshape(pdm_2d_rot_global(1, 2, :), [], 1))
 
-fix_color_map = 0;
-colorbar_lim = 1;
+fix_color_map = 1;
+colorbar_lim = 30;
 accumulation = 1;
-frame_step = 10;
+frame_step = 1;
+frame_margin = 127;
+delay=0.01;
+frame_start = 6000;
+frame_stop = 9600;
+do_avr = 0;
+draw_time = 1;
 
-for frame=330:frame_step:numel(pdm_2d_rot_global(1,1,:))
+figure(1)
+figure(2)
+%avr_frame = sum(pdm_2d_rot_global(:,:,frame_start:frame_stop),3)/(frame_stop-frame_start+1);
+if(do_avr==1)
+    avr_frame = sum(pdm_2d_rot_global(:,:,:),3)/numel(pdm_2d_rot_global(1,1,:));
+else
+    avr_frame  = 0;
+end
+
+for frame=frame_start:frame_step:frame_stop%numel(pdm_2d_rot_global(1,1,:))
     if(fix_color_map == 0)
-        imagesc(double(pdm_2d_rot_global(:,:,frame))/accumulation); 
+        imagesc(double(pdm_2d_rot_global(:,:,frame))/accumulation-avr_frame); 
     else
-        imagesc(double(pdm_2d_rot_global(:,:,frame))/accumulation, [0 colorbar_lim]); 
+        imagesc(double(pdm_2d_rot_global(:,:,frame))/accumulation-avr_frame, [0 colorbar_lim]); 
     end
     colorbar;
-    pause(0.02);
+    pause(delay);
+    if(mod(frame,128) == 1 && draw_time == 1)
+        figure(2)
+        plot(lightcurvesum_global(frame:frame+frame_margin));
+        figure(1)
+    end
     frame
 end
 
@@ -25,7 +51,6 @@ for frame=128*28299:128*k:numel(lightcurvesum_global)
     plot(lightcurvesum_global(frame:frame+127),'.-');
     xlabel(int2str(frame));
     pause(1);
-    stop
 end 
 
 %% time
@@ -94,4 +119,13 @@ for frame=1:frame_step:numel(pdm_2d_rot_global_lafft_dec(1,1,:))
     colorbar;
     pause(0.1);
     frame
+end
+
+
+%% time checker
+sz = int32(numel(unixtime_dbl_global)/128);
+for i=1:sz
+    plot(unixtime_dbl_global(128*i-127:128*i)-unixtime_dbl_global(128*i-127));
+    pause(0.01);
+    i
 end

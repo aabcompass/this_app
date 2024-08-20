@@ -1,9 +1,9 @@
 % Universal .dat to .mat converter
 
-% 7 Lovozero D1
-% 6 Lovozero D3
+% 7 Lovozero (Aragats) D1
+% 6 Lovozero (Aragats) D3
 % 5 Tuloma SP channel
-% 4 Tuloma 2nd season
+% 4 Tuloma 2nd and 3rd seasons 
 % 3 Mini-EUSO L3 (Tuloma 1st season)
 % 2 Mini-EUSO L2 (Tuloma 1st season)
 % 1 Mini-EUSO L1 (Tuloma 1st season)
@@ -15,7 +15,7 @@ function exit_code = this(path, level, Ts)
     display('JEM-EUSO .dat to .mat preprocessor'); 
 
     this_ver = "5";
-    this_sub_ver = "5";
+    this_sub_ver = "6";
 
     
     % Задание параметров программы
@@ -55,7 +55,7 @@ function exit_code = this(path, level, Ts)
         case 5
             listing = dir([path '/frm*sp*.dat'])
         case 6    
-            listing = dir([path '/frm*.dat'])
+            listing = dir([path '/frm*d3*.dat']);
         case 7
             listing = dir([path '/frm*d1*.dat'])
         otherwise
@@ -219,10 +219,10 @@ function exit_code = this(path, level, Ts)
         %    if(filesize ~= 3840064)
         %        continue;
         %    end
-        elseif(level==7)
-            if(filesize ~= 3687040)
-                continue;
-            end
+        %elseif(level==7)
+        %    if(filesize ~= 3687040)
+        %        continue;
+        %    end
         end
 
         fid = fopen(filename);
@@ -472,6 +472,7 @@ function exit_code = this(path, level, Ts)
 
     k=0;
     for i=1:numel(ngtu_global)
+        k2=0;
         for j=1:num_of_frames
             if(level == 2) 
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + j*128)*(2.5e-6);
@@ -484,13 +485,13 @@ function exit_code = this(path, level, Ts)
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
                 k=k+1;            
             elseif(level == 6) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(unixtime_global(i) + k*Ts*400)*(2.5e-6) - 5;
+                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) + double(k2*Ts)/1000;
                 %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
-                k=k+1; 
+                k2=k2+1; 
             elseif(level == 7) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*1e-6 + double((j-64))*(2.625e-6);
+                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) + double(k2*Ts)/1000000;
                 %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
-                k=k+1; 
+                k2=k2+1; 
             end
         end
     end        
@@ -548,7 +549,7 @@ function exit_code = this(path, level, Ts)
    disp 'Saving martixes to .mat file'
 
    if(level==6 || level==7)
-        save([path '/lovozero.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global', 'pdm_2d_sp_global' ,'period_us', '-v7.3');
+        save([path '/lovozero.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
         %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
    elseif(level==5)
         unixtime_dbl_sp_global = unixtime_dbl_global;
