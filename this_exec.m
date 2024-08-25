@@ -12,7 +12,8 @@
 %this('/home/alx/tmp/lovozero_pixelmaps/pixels','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/PMTs','6',4.2);
 %this('.','7',2.5*1.05);
-this('.','6',(2.5*1.05*5000/1000));
+this('.','6',(2.5*1.05*5000));
+%this('.','8',2.5);
 %this('/mnt/md0/yandex.disk/Grant_Tuloma/Aragats/2024_06_21/d1','7',(2.5*1.05));
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/Aragats_2024_06_13/21','7',(2.5*1.05));
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/Aragats_2024_06_13/22','7',(2.5*1.05));

@@ -6,13 +6,13 @@ stop
 %%
 plot(reshape(pdm_2d_rot_global(1, 2, :), [], 1))
 
-fix_color_map = 1;
+fix_color_map = 0;
 colorbar_lim = 30;
 accumulation = 1;
 frame_step = 1;
 frame_margin = 127;
 delay=0.01;
-frame_start = 6000;
+frame_start = 1;
 frame_stop = 9600;
 do_avr = 0;
 draw_time = 1;
