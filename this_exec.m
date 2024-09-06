@@ -12,7 +12,7 @@
 %this('/home/alx/tmp/lovozero_pixelmaps/pixels','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/PMTs','6',4.2);
 %this('.','7',2.5*1.05);
-this('.','6',(2.5*1.05*5000));
+%this('.','6',(2.5*1.05*10000));
 %this('.','8',2.5);
 %this('/mnt/md0/yandex.disk/Grant_Tuloma/Aragats/2024_06_21/d1','7',(2.5*1.05));
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/Aragats_2024_06_13/21','7',(2.5*1.05));
@@ -26,13 +26,16 @@ this('.','6',(2.5*1.05*5000));
 
 
 
-stop
 
 delete(gcp('nocreate'))
-p=parpool(3); %создает пул параллельных вычислений на 3 параллельных потока
-F17 = parfeval(p, @this,1, '/mnt/md0/Aurora/l20231029/7z/22','6',4.2); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
-F18 = parfeval(p, @this,1, '/mnt/md0/Aurora/l20231029/7z/23','6',4.2);
-F19 = parfeval(p, @this,1, '/mnt/md0/Aurora/l20231029/7z/00','6',4.2);
+p=parpool(6); %создает пул параллельных вычислений на 3 параллельных потока
+F18 = parfeval(p, @this,1, '/mnt/md0/Aragats/18','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F19 = parfeval(p, @this,1, '/mnt/md0/Aragats/19','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F20 = parfeval(p, @this,1, '/mnt/md0/Aragats/20','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F21 = parfeval(p, @this,1, '/mnt/md0/Aragats/21','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F22 = parfeval(p, @this,1, '/mnt/md0/Aragats/22','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F23 = parfeval(p, @this,1, '/mnt/md0/Aragats/23','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
+F00 = parfeval(p, @this,1, '/mnt/md0/Aragats/00','7',2.5*1.05); %запускает на пуле p процесс  '/mnt/DNS/MLT_data/20230325/17'  с параметром '4'. 1 - число вых параметров
 %F20 = parfeval(p, @this,1, '/mnt/DNS/MLT_data/20230318/20','4');
 %F21 = parfeval(p, @this,1, '/mnt/DNS/MLT_data/20230318/21','4');
 %F22 = parfeval(p, @this,1, '/mnt/DNS/MLT_data/20230318/22','4');

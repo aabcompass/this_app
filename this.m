@@ -16,7 +16,7 @@ function exit_code = this(path, level, Ts)
     disp('JEM-EUSO .dat to .mat preprocessor'); 
 
     this_ver = "6";
-    this_sub_ver = "0";
+    this_sub_ver = "1";
 
     
     % Задание параметров программы
@@ -266,8 +266,15 @@ function exit_code = this(path, level, Ts)
             numel_section = numel(sections);
         end
         
+        %if(level==7)
+        %    section_list=[17:numel_section 1:16];
+        %else 
+        %    section_list=1:numel_section;
+        %end
+        
         strange_offset = 2;
         for i=1:numel_section
+        %for i=section_list
             if (sections(i) ~= 0) || (only_triggered == 1)
                 if(level == 1 || level == 2 || level == 3)
                     if(sections(i)+30+sizeof_point+strange_offset+sizeof_point*frame_size*num_of_frames-1) <= size(cpu_file, 1)
@@ -315,9 +322,9 @@ function exit_code = this(path, level, Ts)
             end
         end
         
-        D_ngtu = circshift(D_ngtu,9);
-        D_unixtime = circshift(D_unixtime,9);
-        D_tt = circshift(D_tt,9);
+        % = circshift(D_ngtu,9);
+        %D_unixtime = circshift(D_unixtime,9);
+        %D_tt = circshift(D_tt,9);
 
 
         if (level == 1)
@@ -577,11 +584,18 @@ function exit_code = this(path, level, Ts)
        
    disp 'Saving martixes to .mat file'
 
+   C = strsplit(pwd,'/');
+   folder_name=cell2mat(C(size(C,2)));
+
+   
    if(level==8)
         save([path '/lovozero.mat'], 'this_ver', 'this_sub_ver','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
         %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
-   elseif(level==6 || level==7)
-        save([path '/lovozero.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
+   elseif(level==7)
+        save([path folder_name '_d1.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
+        %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
+   elseif(level==6)
+        save([path folder_name '_d3.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
         %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
    elseif(level==5)
         unixtime_dbl_sp_global = unixtime_dbl_global;
