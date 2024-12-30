@@ -1,6 +1,6 @@
 integration = 10000;
 date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
-
+    
 plot(date,lightcurvesum_global/integration,'-k')
 stop
 %%

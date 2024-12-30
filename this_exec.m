@@ -23,7 +23,7 @@
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/Aragats_2024_06_12_10','7',(2.5*1.05/1000));
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/lftp','7',0.001*1.05*2.5);
 %this('/home/alx/Downloads/102','6',4.2);
-
+this('/home/alx/matlab_prj/Tuloma22_23','5',0);
 
 
 

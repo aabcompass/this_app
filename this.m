@@ -104,10 +104,10 @@ function exit_code = this(path, level, Ts)
     elseif(level==5)
         period_us = 1000; %Tuloma SP channel
         frame_size=16; % задать число пикселей ФПУ / number of pixels on FS
-        num_of_frames=60000; % задать число фреймов в пакете / number of frames per packet
-        magic_word = [hex2dec('00') hex2dec('10') hex2dec('1E') hex2dec('5A') hex2dec('1A') hex2dec('98') hex2dec('3A') hex2dec('00')];
+        num_of_frames=5000; % задать число фреймов в пакете / number of frames per packet
+        magic_word = [hex2dec('00') hex2dec('10') hex2dec('1E') hex2dec('5A') hex2dec('1A') hex2dec('e2') hex2dec('04') hex2dec('00')];
     elseif(level==4)
-        period_us = 1000; %Tuloma 2nd season
+        period_us = 1000; %Tuloma 2nd seasonS
         frame_size=256; % задать число пикселей ФПУ / number of pixels on FS
         num_of_frames=5000; % задать число фреймов в пакете / number of frames per packet        
         dimx_ecasic = 8; %задать размер по х блока данных, выдаваемый платой ECASIC
@@ -231,10 +231,10 @@ function exit_code = this(path, level, Ts)
             if(filesize ~= 5120064)
                 continue;
             end
-        elseif(level==5)
-            if(filesize ~= 3840064)
-                continue;
-            end
+        % elseif(level==5)
+        %     if(filesize ~= 3840064)
+        %         continue;
+        %     end
         %elseif(level==6)
         %    if(filesize ~= 3840064)
         %        continue;
@@ -514,10 +514,10 @@ function exit_code = this(path, level, Ts)
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*400)*(2.5e-6)-5;
                 k=k+1;
             elseif(level == 5) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
+                %unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
                 k=k+1;            
             elseif(level == 6) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) + double(k2*Ts)/1000000;
+                %unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) + double(k2*Ts)/1000000;
                 %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
                 k2=k2+1; 
             elseif(level == 7) 
