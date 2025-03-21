@@ -41,7 +41,7 @@ function exit_code = this(path, level, Ts)
     n_active_pixels = 256; % needed for lightcurves.
     
     
-    
+    spb_2_48x48 = 0;
     
     
     switch level
@@ -96,7 +96,7 @@ function exit_code = this(path, level, Ts)
     elseif(level==6)
         period_us = (Ts); %Lovozero
         frame_size=2880; % задать число пикселей ФПУ / number of pixels on FS
-        num_of_frames=determine_n_frames(listing); % 
+        num_of_frames=determine_n_frames(listing)-1; % 
         dimx_ecasic = 8; %задать размер по х блока данных, выдаваемый платой ECASIC
         dimy_ecasic = 60;%задать размер по y блока данных, выдаваемый платой ECASIC
         n_ecasic=6;% задать количество плат ECASIC
@@ -173,7 +173,12 @@ function exit_code = this(path, level, Ts)
         sizeof_point = 1;
         rotation_needed = 0;    
     elseif(level==6)
-        pdm_2d_rot_global = uint32(zeros(48,16,numel(listing)*num_of_frames));
+        if(spb_2_48x48 == 0)
+            pdm_2d_rot_global = uint32(zeros(48,16,numel(listing)*num_of_frames));
+        else
+            pdm_2d_rot_global = uint32(zeros(48,48,numel(listing)*num_of_frames));
+        end
+        
         pdm_2d_sp_global = uint32(zeros(16,8,numel(listing)*num_of_frames));
         %diag_global = uint32(zeros(16,numel(listing)*num_of_frames));
         lightcurvesum_global = zeros(1,numel(listing)*num_of_frames);
@@ -302,6 +307,7 @@ function exit_code = this(path, level, Ts)
                         D_tushv(1:8)  = cpu_file(sections(i)+16:sections(i)+23);
                 elseif(level == 6)
                         tmp=uint8(cpu_file(sections(i)+28: sections(i)+28+sizeof_point*frame_size*num_of_frames-1)); 
+                        tmp=circshift(tmp,-512+3840);
                         D_bytes(i,1:size(tmp)) = tmp(:);                                       
                         D_ngtu(i) = typecast(uint8(cpu_file(sections(i)+8:sections(i)+11)), 'uint32');
                         D_unixtime(i) = typecast(uint8(cpu_file(sections(i)+12:sections(i)+15)), 'uint32');
@@ -469,8 +475,11 @@ function exit_code = this(path, level, Ts)
                         pdm_2d_ki(ii,:) = (pdm_2d_rot((ii-1)*10+2,:));
                     end
                     pdm_2d_rot_global_cnt = pdm_2d_rot_global_cnt + 1;
-                    
-                    pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt) = [pdm_2d_pc(:,17:24) pdm_2d_pc(:,41:48)] ;
+                    if(spb_2_48x48 == 0)
+                        pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt) = [pdm_2d_pc(:,17:24) pdm_2d_pc(:,41:48)] ;
+                    else    
+                        pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt) = pdm_2d_pc;
+                    end
                     pdm_2d_sp_global(:,:,pdm_2d_rot_global_cnt) = pdm_2d_pc(33:48,25:32);
                     lightcurvesum_global(pdm_2d_rot_global_cnt) = sum(sum(pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt)))/(256*3);
                 end
@@ -514,10 +523,10 @@ function exit_code = this(path, level, Ts)
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*400)*(2.5e-6)-5;
                 k=k+1;
             elseif(level == 5) 
-                %unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
+                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
                 k=k+1;            
             elseif(level == 6) 
-                %unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) + double(k2*Ts)/1000000;
+                unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) +  double(k2*Ts)/1000;
                 %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
                 k2=k2+1; 
             elseif(level == 7) 
@@ -604,7 +613,7 @@ function exit_code = this(path, level, Ts)
         save([path '/tuloma_sp.mat'], 'this_ver', 'this_sub_ver', 'sp_global', 'sp_letter', 'sp_func', 'unixtime_dbl_sp_global', 'D_tushv_global', 'period_us', '-v7.3');
    elseif(level==4)
         save([path '/tuloma.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global', 'lightcurvesum_global', 'pdm_2d_rot_global', 'diag_global',  'period_us', '-v7.3');
-        save([path '/tuloma_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim', 'lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
+        %save([path '/tuloma_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim', 'lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
    elseif(level==3)
         cwt_global = abs(cwt(lightcurvesum_global));
         lightcurvesum_global(128*unixtime_global_numel+1 : lightcurvesum_global_numel) = [];
