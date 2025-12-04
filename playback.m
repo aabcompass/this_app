@@ -1,24 +1,31 @@
-integration = 10000;
+integration = 2400;
+
 date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
     
-plot(date,lightcurvesum_global/integration,'-k')
+plot(date,lightcurvesum_global/integration,'.-k')
+stop
+
 stop
 %%
 plot(reshape(pdm_2d_rot_global(1, 2, :), [], 1))
 
 fix_color_map = 0;
-colorbar_lim = 5;
-accumulation = 1250;
+colorbar_lim = 300000;
+accumulation = 1600;   
 frame_step = 1;
 frame_margin = 127;
 delay=0.01;
-frame_start = 1;
-frame_stop = 1500;
+frame_start = 133000;
+frame_stop = 1000000;
 do_avr = 0;
 draw_time = 1;
+make_gif = 0;
+  frameDelay = 1;
+  loopCount = 0;
+  filename = 'imagesc.gif';
 
 figure(1)
-figure(2)
+%figure(2)
 %avr_frame = sum(pdm_2d_rot_global(:,:,frame_start:frame_stop),3)/(frame_stop-frame_start+1);
 if(do_avr==1)
     avr_frame = sum(pdm_2d_rot_global(:,:,:),3)/numel(pdm_2d_rot_global(1,1,:));
@@ -32,14 +39,29 @@ for frame=frame_start:frame_step:frame_stop%numel(pdm_2d_rot_global(1,1,:))
     else
         imagesc(double(pdm_2d_rot_global(:,:,frame))/accumulation-avr_frame, [0 colorbar_lim]); 
     end
+    title(frame);
     colorbar;
     pause(delay);
-    if(mod(frame,128) == 1 && draw_time == 1)
-        figure(2)
-        plot(lightcurvesum_global(frame:frame+frame_margin));
-        figure(1)
-    end
+    %if(mod(frame,128) == 1 && draw_time == 1)
+    %    figure(2)
+    %    plot(lightcurvesum_global(frame:frame+frame_margin));
+    %    figure(1)
+    %end
     frame
+
+    if(make_gif ==  1)
+        frame1 = getframe(gcf);
+        im = frame2im(frame1);
+        [imind, cm] = rgb2ind(im, 256);
+        if frame == frame_start
+            % Первый кадр — создаём файл
+            imwrite(imind, cm, filename, 'gif', 'Loopcount', loopCount, 'DelayTime', frameDelay);
+        else
+            % Последующие кадры — добавляем
+            imwrite(imind, cm, filename, 'gif', 'WriteMode', 'append', 'DelayTime', frameDelay);
+        end
+    end
+
 end
 
 stop

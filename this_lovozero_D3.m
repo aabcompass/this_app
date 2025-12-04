@@ -1,0 +1,143 @@
+
+function exit_code = this_lovozero_D3(path, Ts)
+    
+    disp('Lovozero D3 .dat to .mat preprocessor'); 
+
+    this_ver = "7";
+    this_sub_ver = "1";
+
+    frame_step=1; % 1 - show all frames, 2 - show ever 2nd frame, etc
+        
+    spb_2_48x48 = 0;
+        
+    listing = dir([path '/frm*d3*.dat']);
+    if(numel(listing) == 0) 
+        display('No .dat files found in the specified folder');
+        exit_code = -1;
+        return;
+    end
+
+    period_us = Ts; %Lovozero
+    frame_size=2880; % задать число пикселей ФПУ / number of pixels on FS
+    num_of_frames=determine_n_frames(listing, 11520)-1; % 
+    dimx_ecasic = 8; %задать размер по х блока данных, выдаваемый платой ECASIC
+    dimy_ecasic = 60;%задать размер по y блока данных, выдаваемый платой ECASIC
+    n_ecasic=6;% задать количество плат ECASIC
+    magic_word = [hex2dec('03') hex2dec('0C') hex2dec('16') hex2dec('5A')];%hex2dec('1A') hex2dec('94') hex2dec('11') hex2dec('00')
+        
+    % Некоторые МАФЭУ (8х)по техническим причинам повернуты. 
+   
+    pdm_2d_rot_global_cnt = 0;
+    norm_file_cnt = 1;
+       
+    if(spb_2_48x48 == 0)
+        pdm_2d_rot_global = uint32(zeros(48,16,numel(listing)*num_of_frames));
+    else
+        pdm_2d_rot_global = uint32(zeros(48,48,numel(listing)*num_of_frames));
+    end
+    
+    pdm_2d_sp_global = uint32(zeros(16,8,numel(listing)*num_of_frames));
+    
+    lightcurvesum_global = zeros(1,numel(listing)*num_of_frames);
+    unixtime_global = uint32(zeros(1, numel(listing)));
+    ngtu_global = uint32(zeros(1, numel(listing)));
+    sizeof_point = 4;
+
+    for filename_cntr = 1:numel(listing) % указание на номера файлов, из которых будет произведено чтение
+        %цикл, выполняющийся для каждого файла. 
+
+        lst = listing(filename_cntr,1);
+        filename = [path '/' lst.name]; 
+        
+        fid = fopen(filename);
+
+        fprintf('%s\n',filename);
+
+        cpu_file = uint8(fread(fid, inf)); %прочитать файл в память / read file to memory
+        fclose(fid); %закрыть файл / close file
+        addrs = strfind(cpu_file',magic_word);        
+        sections(1:numel(addrs)) = addrs;        
+        
+        numel_section = numel(sections);
+                
+        for i=1:numel_section            
+            tmp=uint8(cpu_file(sections(i)+28: sections(i)+28+sizeof_point*frame_size*num_of_frames-1)); 
+            %tmp=circshift(tmp,-512+3840);
+            D_bytes(i,1:size(tmp)) = tmp(:);                                       
+            D_ngtu(i) = typecast(uint8(cpu_file(sections(i)+8:sections(i)+11)), 'uint32');
+            D_unixtime(i) = typecast(uint8(cpu_file(sections(i)+12:sections(i)+15)), 'uint32');
+            D_tt(i) = uint8(cpu_file(sections(i)+16));           
+        end
+        
+        unixtime_global(norm_file_cnt) = uint32(D_unixtime(1));
+        ngtu_global(norm_file_cnt) = uint32(D_ngtu(1));
+        norm_file_cnt = norm_file_cnt+1;   
+        
+        datasize = sizeof_point*frame_size*num_of_frames;
+        for packet=1:1:numel_section
+
+            frame_data = reshape(D_bytes(packet,1:datasize), [1 datasize]); % выбрать из всех данных, полученных из файла, блок, содержащий изображение / take subarray with only image data
+            frame_data_cast = typecast(frame_data(:), 'uint32'); %преобразовать представление данных к  uint32 // convert to uint32
+            frames = reshape(frame_data_cast, [frame_size num_of_frames]); % перегруппировать массив из одномерного в двумерный
+            
+            % Формирование изображения            
+            for current_frame=1:frame_step:num_of_frames
+                pic = (frames(:, current_frame)');
+                ecasics_2d = fliplr(reshape(pic', [dimx_ecasic dimy_ecasic n_ecasic]));
+                pdm_2d_rot = [ecasics_2d(:,:,1)' ecasics_2d(:,:,2)' ecasics_2d(:,:,3)' ecasics_2d(:,:,4)' ecasics_2d(:,:,5)' ecasics_2d(:,:,6)']; % form an array 48x48 with just one frame  
+                for ii = 1:n_ecasic % 6
+                    pdm_2d_pc((ii-1)*8+1:ii*8,:) = pdm_2d_rot((ii-1)*10+3:ii*10,:); %показания с прибора
+                    pdm_2d_ki(ii,:) = (pdm_2d_rot((ii-1)*10+2,:));
+                end
+                pdm_2d_rot_global_cnt = pdm_2d_rot_global_cnt + 1;
+                if(spb_2_48x48 == 0)
+                    pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt) = [pdm_2d_pc(:,17:24) pdm_2d_pc(:,41:48)] ;
+                else    
+                    pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt) = pdm_2d_pc;
+                end
+                pdm_2d_sp_global(:,:,pdm_2d_rot_global_cnt) = pdm_2d_pc(33:48,25:32);
+                lightcurvesum_global(pdm_2d_rot_global_cnt) = sum(sum(pdm_2d_rot_global(:,:,pdm_2d_rot_global_cnt)))/(256*3);
+            end
+        end
+    end
+        
+    disp 'Generate double unix time'
+    
+    if(filename_cntr > 1)
+        dngtu=diff(double(ngtu_global));
+        ngtu_u64_global = uint64(zeros(1, numel(ngtu_global)));
+        ovflw_cnt = 0;
+        ngtu_u64_global(1) = double(ngtu_global(1));
+        ngtu_u64_global(2) = double(ngtu_global(2));
+        for i=1:numel(ngtu_global)-2
+            if(dngtu(i+1) - dngtu(i) < -1e9) 
+                ovflw_cnt = ovflw_cnt + 1;
+            end
+            ngtu_u64_global(i+2) = uint64(ngtu_global(i+2)) + ovflw_cnt*2^32;
+        end
+    end
+
+    
+    for i=1:numel(ngtu_global)
+        k2=0;
+        for j=1:num_of_frames
+            unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) +  double(k2*Ts)/1000;
+            k2=k2+1; 
+        end
+    end        
+       
+    disp 'Saving martixes to .mat file'
+
+    C = strsplit(pwd,'/');
+    
+    folder_name=cell2mat(C(size(C,2)));
+
+    save([path folder_name '_d3.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
+    exit_code = 0;
+    
+    disp 'Done'
+    
+end
+
+
+

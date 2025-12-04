@@ -96,7 +96,7 @@ function exit_code = this(path, level, Ts)
     elseif(level==6)
         period_us = (Ts); %Lovozero
         frame_size=2880; % задать число пикселей ФПУ / number of pixels on FS
-        num_of_frames=determine_n_frames(listing)-1; % 
+        num_of_frames=determine_n_frames(listing, 11520)-1; % 
         dimx_ecasic = 8; %задать размер по х блока данных, выдаваемый платой ECASIC
         dimy_ecasic = 60;%задать размер по y блока данных, выдаваемый платой ECASIC
         n_ecasic=6;% задать количество плат ECASIC
@@ -104,8 +104,9 @@ function exit_code = this(path, level, Ts)
     elseif(level==5)
         period_us = 1000; %Tuloma SP channel
         frame_size=16; % задать число пикселей ФПУ / number of pixels on FS
-        num_of_frames=5000; % задать число фреймов в пакете / number of frames per packet
-        magic_word = [hex2dec('00') hex2dec('10') hex2dec('1E') hex2dec('5A') hex2dec('1A') hex2dec('e2') hex2dec('04') hex2dec('00')];
+        num_of_frames=determine_n_frames(listing, frame_size*4)%5000; % задать число фреймов в пакете / number of frames per packet
+        %magic_word = [hex2dec('00') hex2dec('10') hex2dec('1E') hex2dec('5A') hex2dec('1A') hex2dec('e2') hex2dec('04') hex2dec('00')];
+        magic_word = [hex2dec('00') hex2dec('10') hex2dec('1E') hex2dec('5A')];
     elseif(level==4)
         period_us = 1000; %Tuloma 2nd seasonS
         frame_size=256; % задать число пикселей ФПУ / number of pixels on FS
@@ -307,7 +308,7 @@ function exit_code = this(path, level, Ts)
                         D_tushv(1:8)  = cpu_file(sections(i)+16:sections(i)+23);
                 elseif(level == 6)
                         tmp=uint8(cpu_file(sections(i)+28: sections(i)+28+sizeof_point*frame_size*num_of_frames-1)); 
-                        tmp=circshift(tmp,-512+3840);
+                        %tmp=circshift(tmp,-512+3840);
                         D_bytes(i,1:size(tmp)) = tmp(:);                                       
                         D_ngtu(i) = typecast(uint8(cpu_file(sections(i)+8:sections(i)+11)), 'uint32');
                         D_unixtime(i) = typecast(uint8(cpu_file(sections(i)+12:sections(i)+15)), 'uint32');
@@ -520,11 +521,15 @@ function exit_code = this(path, level, Ts)
             elseif(level == 3) 
                 unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + j*128*128)*(2.5e-6);
             elseif(level == 4) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*400)*(2.5e-6)-5;
-                k=k+1;
+                % unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*400)*(2.5e-6)-5;
+                % k=k+1;
+                % unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(2.5e-6) +  double(k2*Ts)/1000;
+                unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6)*1000 +  double(k2*Ts)/1000;
+                k2=k2+1; 
             elseif(level == 5) 
-                unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
-                k=k+1;            
+                %unixtime_dbl_global((i-1)*num_of_frames+j)=double(unixtime_global(1)) + double(ngtu_u64_global(i) + k*1000)*(1e-6)-60;
+                unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6)*1000 +  double(k2*Ts)/1000;
+                k2=k2+1;            
             elseif(level == 6) 
                 unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_u64_global(i))*(1e-6) +  double(k2*Ts)/1000;
                 %unixtime_dbl_global((i-1)*num_of_frames+j) = double(unixtime_global(i)) + double(ngtu_global(i))*2.625e-6 + j*4*1e-3; %Ts
@@ -607,10 +612,11 @@ function exit_code = this(path, level, Ts)
         save([path folder_name '_d3.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global','lightcurvesum_global', 'pdm_2d_rot_global','period_us', '-v7.3');
         %save([path '/lovozero_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim','lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
    elseif(level==5)
+        lightcurvesum_global=sum(sp_global);
         unixtime_dbl_sp_global = unixtime_dbl_global;
         sp_letter = ["A","I","B","J","C","K","D","L","E","M","F","N","G","Q","H","P"];
         sp_func = ["KC-11","UFS-1","EMPTY","J","430","337","EMPTY","EMPTY","EMPTY","M","EMPTY","EMPTY","EMPTY","Q","H","390"];
-        save([path '/tuloma_sp.mat'], 'this_ver', 'this_sub_ver', 'sp_global', 'sp_letter', 'sp_func', 'unixtime_dbl_sp_global', 'D_tushv_global', 'period_us', '-v7.3');
+        save([path '/tuloma_sp.mat'], 'this_ver', 'this_sub_ver', 'sp_global', 'lightcurvesum_global', 'sp_letter', 'sp_func', 'unixtime_dbl_sp_global', 'D_tushv_global', 'period_us', '-v7.3');
    elseif(level==4)
         save([path '/tuloma.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global', 'lightcurvesum_global', 'pdm_2d_rot_global', 'diag_global',  'period_us', '-v7.3');
         %save([path '/tuloma_decim.mat'], 'this_ver', 'this_sub_ver', 'unixtime_dbl_global_decim', 'lightcurvesum_global_decim', 'period_us_decim', '-v7.3');
