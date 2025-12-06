@@ -153,7 +153,7 @@ function exit_code = this_lovozero_D3(path, Ts, include_2d)
     f = figure('visible','off');
     plot(date,lightcurvesum_global/integration,'.-k');
     dateshort = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd');
-    title(['Lovozero lightcurve: ' string(dateshort(numel(dateshort)))]);
+    title(['Lovozero lightcurve: ' dateshort(numel(dateshort))]);
     saveas(f,[path '/lovozero_d3.png']);
     %close all;
     disp 'Done'

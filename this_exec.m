@@ -15,7 +15,7 @@
 %this('./','7',2.5*1.05);
 %this('./','4',1);
 %this('./','5',1);
-this_lovozero_D3('/home/alx/xil_proj/Lovozero_2025/calibs/5',4.2);
+this_lovozero_D3('/home/alx/xil_proj/Lovozero_2025/calibs/5',4.2,0);
 stop;
 this('./','6',4.2); 
 %this('.','8',2.5);
