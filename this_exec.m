@@ -13,9 +13,9 @@
 %this('/home/alx/tmp/lovozero_pixelmaps/pixels','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/PMTs','6',4.2);
 %this('./','7',2.5*1.05);
-%this('./','4',1);
+this_Tuloma_D3('./', 4, 0);
 %this('./','5',1);
-this_lovozero_D3('/home/alx/xil_proj/Lovozero_2025/calibs/5',4.2,0);
+%this_lovozero_D3('/home/alx/xil_proj/Lovozero_2025/calibs/5',4.2,0);
 stop;
 this('./','6',4.2); 
 %this('.','8',2.5);
