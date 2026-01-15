@@ -6,14 +6,14 @@
 % this('.',3);
 % cd ('../2022-01-22')
 % this('.',2);
-%this('.','5','0');
+this('.','5', 1);
 %stop;
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/lftp/Lvozero-1st/1','6','4');
 %this('/mnt/md0/Aurora/l20231029/7z/22','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/pixels','6',4.2);
 %this('/home/alx/tmp/lovozero_pixelmaps/PMTs','6',4.2);
 %this('./','7',2.5*1.05);
-this_Tuloma_D3('./', 4, 0);
+%this_Tuloma_D3('./', 4, 0);
 %this('./','5',1);
 %this_lovozero_D3('/home/alx/xil_proj/Lovozero_2025/calibs/5',4.2,0);
 stop;
