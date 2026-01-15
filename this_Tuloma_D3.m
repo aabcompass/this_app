@@ -198,6 +198,16 @@ function exit_code = this_Tuloma_D3(path, Ts, include_2d)
    end
 
    exit_code = 0;
+   
+   disp 'Generate Tuloma_d3.png'
+   
+   integration = Ts*1000/2.5;
+   date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
+   f = figure('visible','off');
+   plot(date,lightcurvesum_global/integration,'.-k');
+   dateshort = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd');
+   title(['Tuloma lightcurve: ' string(dateshort(numel(dateshort)))]);
+   saveas(f,[path '/tuloma_d3.png']);
     
    disp 'Done'
     
