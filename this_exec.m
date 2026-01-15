@@ -6,7 +6,7 @@
 % this('.',3);
 % cd ('../2022-01-22')
 % this('.',2);
-this_Tuloma_SP('.', 1);
+this_Tuloma_SP('.', 1, 0);
 %stop;
 %this('/mnt/md0/xil_proj/MLT_TUS16/23-24/lovosero/lftp/Lvozero-1st/1','6','4');
 %this('/mnt/md0/Aurora/l20231029/7z/22','6',4.2);

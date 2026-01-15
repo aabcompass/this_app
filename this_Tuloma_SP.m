@@ -1,4 +1,4 @@
-function exit_code = this(path, Ts)
+function exit_code = this(path, Ts, is_full)
    
     disp('JEM-EUSO .dat to .mat preprocessor'); 
 
@@ -59,7 +59,11 @@ function exit_code = this(path, Ts)
         return;
     end
     
-    sp_global = zeros(16, numel(listing)*num_of_frames);
+    if(is_full == '1')
+        sp_global = zeros(16, numel(listing)*num_of_frames);
+    else
+        sp_global = zeros(5, numel(listing)*num_of_frames);
+    end
     unixtime_global = uint32(zeros(1, numel(listing)));
     D_tushv_global  = uint8(zeros(1, numel(listing)))*12;
     unixtime_dbl_global = zeros(1,numel(listing)*num_of_frames);
@@ -111,7 +115,11 @@ function exit_code = this(path, Ts)
             frame_data = reshape(D_bytes(packet,1:datasize), [1 datasize]); % выбрать из всех данных, полученных из файла, блок, содержащий изображение / take subarray with only image data
             frame_data_cast = typecast(frame_data(:), 'uint32'); %преобразовать представление данных к  uint32 // convert to uint32
             frames = reshape(frame_data_cast, [frame_size num_of_frames]); % перегруппировать массив из одномерного в двумерный
-            sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames;
+            if(is_full == '1')
+                sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames;
+            else
+                sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames([1,2,5,6,16],:);
+            end
         end
     end
     
@@ -168,7 +176,7 @@ function exit_code = this(path, Ts)
    integration = Ts*1000/1;
    date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
    f = figure('visible','off');
-   plot(date,(sp_global([1,2,5,6,16],:)/integration)');
+   plot(date,(sp_global/integration)');
    dateshort = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd');
    title(['Tuloma lightcurve: ' string(dateshort(numel(dateshort)))]);
    saveas(f,[path '/tuloma_d3.png']);
