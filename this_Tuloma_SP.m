@@ -175,7 +175,7 @@ function exit_code = this(path, Ts, is_full)
 
    disp 'Generate .png'
    
-   for i=1:3
+   for i=1:5
         sp_global_decim(i,:) = decimate(sp_global(i,:),10);
    end
    
