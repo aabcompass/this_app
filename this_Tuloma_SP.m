@@ -1,7 +1,5 @@
 function exit_code = this(path, Ts)
-
-    level = str2num(level);
-    
+   
     disp('JEM-EUSO .dat to .mat preprocessor'); 
 
     this_ver = "7";
@@ -166,6 +164,15 @@ function exit_code = this(path, Ts)
    sp_func = ["KC-11","UFS-1","EMPTY","J","430","337","EMPTY","EMPTY","EMPTY","M","EMPTY","EMPTY","EMPTY","Q","H","390"];
    save([path '/tuloma_sp.mat'], 'this_ver', 'this_sub_ver', 'sp_global', 'lightcurvesum_global', 'sp_letter', 'sp_func', 'unixtime_dbl_sp_global', 'D_tushv_global', 'period_us', '-v7.3');
    exit_code = 0;
+
+   integration = Ts*1000/1;
+   date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
+   f = figure('visible','off');
+   plot(date,(sp_global([1,2,5,6,16],:)/integration)');
+   dateshort = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd');
+   title(['Tuloma lightcurve: ' string(dateshort(numel(dateshort)))]);
+   saveas(f,[path '/tuloma_d3.png']);
+
     
    disp 'Done'
     
