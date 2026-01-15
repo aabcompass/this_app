@@ -62,7 +62,7 @@ function exit_code = this(path, Ts, is_full)
     if(is_full == '1')
         sp_global = zeros(16, numel(listing)*num_of_frames);
     else
-        sp_global = zeros(5, numel(listing)*num_of_frames);
+        sp_global = zeros(3, numel(listing)*num_of_frames);
     end
     unixtime_global = uint32(zeros(1, numel(listing)));
     D_tushv_global  = uint8(zeros(1, numel(listing)))*12;
@@ -118,7 +118,7 @@ function exit_code = this(path, Ts, is_full)
             if(is_full == '1')
                 sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames;
             else
-                sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames([1,2,5,6,16],:);
+                sp_global(:,(filename_cntr-1)*num_of_frames+1:filename_cntr*num_of_frames) = frames([2,5,6],:);
             end
         end
     end
@@ -173,13 +173,14 @@ function exit_code = this(path, Ts, is_full)
    save([path '/tuloma_sp.mat'], 'this_ver', 'this_sub_ver', 'sp_global', 'lightcurvesum_global', 'sp_letter', 'sp_func', 'unixtime_dbl_sp_global', 'D_tushv_global', 'period_us', '-v7.3');
    exit_code = 0;
 
+   disp 'Generate .png'
    integration = Ts*1000/1;
    date = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd HH:mm:ss.SSSSSSSSS');
    f = figure('visible','off');
    plot(date,(sp_global/integration)');
    dateshort = datetime(unixtime_dbl_global,'ConvertFrom', 'epochtime', 'Format', 'yyy-MM-dd');
-   title(['Tuloma lightcurve: ' string(dateshort(numel(dateshort)))]);
-   saveas(f,[path '/tuloma_d3.png']);
+   title(['Tuloma spectrum: ' string(dateshort(numel(dateshort)))]);
+   saveas(f,[path '/tuloma_sp.png']);
 
     
    disp 'Done'
